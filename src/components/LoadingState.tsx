@@ -13,7 +13,7 @@ export function LoadingState({
         <ActivityIndicator size="large" color="#6366f1" />
       </View>
       <Text className="text-2xl font-black text-white mb-2 text-center italic">
-        chefai<Text className="text-accent-500">.</Text>
+        chef<Text className="text-accent-500">ai</Text>.
       </Text>
       <Text className="text-sm font-bold text-white/50 text-center leading-6 max-w-xs uppercase tracking-widest">
         {message}

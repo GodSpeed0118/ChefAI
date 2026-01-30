@@ -105,11 +105,14 @@ export default function HomeScreen() {
             <View className="flex-row items-center">
               <Ionicons name="basket" size={24} color="#6366f1" />
               <Text className="ml-2 text-2xl font-black text-white italic tracking-tighter">
-                chefa<Text className="text-accent-500">i.</Text>
+                chef<Text className="text-accent-500">ai</Text>.
               </Text>
             </View>
-            <Pressable className="w-10 h-10 rounded-full bg-white/10 items-center justify-center">
-              <Ionicons name="notifications-outline" size={22} color="white" />
+            <Pressable
+              onPress={() => router.push("/saved")}
+              className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
+            >
+              <Ionicons name="heart-outline" size={22} color="white" />
             </Pressable>
           </View>
 

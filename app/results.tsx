@@ -53,7 +53,12 @@ export default function ResultsScreen() {
               <Ionicons name="arrow-back" size={24} color="white" />
             </Pressable>
             <Text className="text-xl font-black text-white italic">Suggested Cookbooks</Text>
-            <View className="w-10" /> {/* Spacer */}
+            <Pressable
+              onPress={() => router.push("/saved")}
+              className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
+            >
+              <Ionicons name="heart-outline" size={22} color="white" />
+            </Pressable>
           </View>
 
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
