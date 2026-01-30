@@ -53,7 +53,8 @@ export default function ResultsScreen() {
               <Ionicons name="arrow-back" size={24} color="white" />
             </Pressable>
             <Text className="text-xl font-black text-white italic">Suggested Cookbooks</Text>
-            <View className="w-10" /> {/* Spacer */}
+            {/* Spacer */}
+            <View className="w-10" />
           </View>
 
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
