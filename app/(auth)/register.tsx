@@ -191,7 +191,7 @@ export default function RegisterScreen() {
                 <View className="flex-row justify-center items-center">
                   <Text style={{ fontSize: Typography.size.md }} className="text-white/40 font-medium">Have access? </Text>
                   <Pressable onPress={() => router.push("/(auth)/login")}>
-                    <Text style={{ fontSize: Typography.size.md }} className="text-accent-400 font-black">Sign In</Text>
+                    <Text style={{ fontSize: Typography.size.md }} className="text-white font-black">Sign In</Text>
                   </Pressable>
                 </View>
               </Animated.View>

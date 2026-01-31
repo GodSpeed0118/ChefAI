@@ -155,7 +155,7 @@ export default function LoginScreen() {
               {/* Form */}
               <View style={{ gap: Spacing.lg }}>
                 <Animated.View entering={FadeInDown.duration(600).delay(600)}>
-                  <Text style={styles.inputLabel}>Email Vault</Text>
+                  <Text style={styles.inputLabel}>Email Address</Text>
                   <View className={`flex-row items-center bg-white/5 border rounded-2xl px-4 transition-all ${focusedInput === 'email' ? "border-accent-500/50 bg-white/10" : errors.email ? "border-rose-500/50" : "border-white/10"}`}>
                     <Ionicons name="mail-outline" size={20} color="white" style={{ opacity: focusedInput === 'email' ? 0.8 : 0.3 }} />
                     <TextInput
@@ -173,12 +173,7 @@ export default function LoginScreen() {
                 </Animated.View>
 
                 <Animated.View entering={FadeInDown.duration(600).delay(800)}>
-                  <View className="flex-row justify-between items-end mb-2 ml-1">
-                    <Text style={styles.inputLabel}>Secure Pin</Text>
-                    <Pressable onPress={handleForgotPassword}>
-                      <Text style={[styles.inputLabel, { color: Colors.accent[500], textTransform: 'none' }]}>Forgot Access?</Text>
-                    </Pressable>
-                  </View>
+                  <Text style={styles.inputLabel}>Password</Text>
                   <View className={`flex-row items-center bg-white/5 border rounded-2xl px-4 ${focusedInput === 'password' ? "border-accent-500/50 bg-white/10" : errors.password ? "border-rose-500/50" : "border-white/10"}`}>
                     <Ionicons name="lock-closed-outline" size={20} color="white" style={{ opacity: focusedInput === 'password' ? 0.8 : 0.3 }} />
                     <TextInput
@@ -226,7 +221,7 @@ export default function LoginScreen() {
                 <View className="flex-row justify-center items-center">
                   <Text style={{ fontSize: Typography.size.md }} className="text-white/40 font-medium">New Chef? </Text>
                   <Pressable onPress={() => router.push("/(auth)/register")}>
-                    <Text style={{ fontSize: Typography.size.md }} className="text-accent-400 font-black">Create Account</Text>
+                    <Text style={{ fontSize: Typography.size.md }} className="text-white font-black">Create Account</Text>
                   </Pressable>
                 </View>
               </Animated.View>
