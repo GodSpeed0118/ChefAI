@@ -25,11 +25,17 @@ export function useSavedRecipes() {
         }
     };
 
+    const getStoredRecipes = async (): Promise<Recipe[]> => {
+        const storedData = await AsyncStorage.getItem(STORAGE_KEY);
+        return storedData ? JSON.parse(storedData) : [];
+    };
+
     const saveRecipe = async (recipe: Recipe) => {
         try {
-            const updatedRecipes = [recipe, ...savedRecipes];
-            setSavedRecipes(updatedRecipes);
+            const current = await getStoredRecipes();
+            const updatedRecipes = [recipe, ...current];
             await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedRecipes));
+            setSavedRecipes(updatedRecipes);
         } catch (error) {
             console.error('Failed to save recipe:', error);
         }
@@ -37,9 +43,10 @@ export function useSavedRecipes() {
 
     const removeRecipe = async (recipeName: string) => {
         try {
-            const updatedRecipes = savedRecipes.filter(r => r.name !== recipeName);
-            setSavedRecipes(updatedRecipes);
+            const current = await getStoredRecipes();
+            const updatedRecipes = current.filter(r => r.name !== recipeName);
             await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedRecipes));
+            setSavedRecipes(updatedRecipes);
         } catch (error) {
             console.error('Failed to remove recipe:', error);
         }
