@@ -49,6 +49,7 @@ The Supabase MCP server is pre-configured in `.mcp.json`.
 - Use Expo's managed workflow; avoid ejecting
 - All source files use TypeScript (`.ts`/`.tsx`); avoid `.js`/`.jsx`
 - Use NativeWind's `className` prop for styling; avoid inline `StyleSheet.create` unless NativeWind doesn't cover the case
+- **NEVER use `transition-all` className** - Not supported in React Native and causes Reanimated warnings (especially on TextInput containers)
 - API keys must go in environment variables (use `expo-constants` or `.env` with `expo-env`), never hardcoded
 - AI API calls should go through a service layer, not directly in components
 - Use TanStack Query hooks to wrap API calls; avoid raw `useEffect` for data fetching
@@ -157,6 +158,7 @@ Routes are automatically protected based on auth state in `app/_layout.tsx`:
 - `app/(auth)/login.tsx` — Login screen with email/password, validation, error display
 - `app/(auth)/register.tsx` — Registration screen with email/password/confirm, validation
 - Both screens use NativeWind styling matching the app's dark indigo theme
+- **Important:** TextInput containers should NOT use `transition-all` className as it causes Reanimated warnings. Use conditional classNames for focus states instead.
 
 ## File Structure
 
@@ -315,7 +317,9 @@ React Native Reanimated v3+ shows warnings when accessing `.value` from the JS t
 
 1. **Don't use `useSharedValue` with event handlers** - Prefer regular state updates
 2. **Don't wrap interactive components in Animated.View with entering animations** - Can conflict with user interactions
-3. **Avoid `transition-all` className** - Not supported in React Native
+3. **NEVER use `transition-all` className** - Not supported in React Native and causes Reanimated warnings
+   - **Especially avoid on TextInput containers** - This will trigger "Reading/Writing from `value` during component render" warnings
+   - Use conditional classNames instead: `className={focusedInput === 'email' ? "border-accent-500" : "border-white/10"}`
 4. **Use worklets for animations** - Or simplify to state-based styling
 
 **Good Pattern:**
