@@ -119,10 +119,10 @@ export default function RecipeScreen() {
                     </Animated.View>
 
                     {/* Steps */}
-                    <Animated.View entering={FadeInDown.delay(600)} className="px-6">
+                    <View className="px-6">
                         <View className="flex-row items-center justify-between mb-6">
                             <Text style={{ fontSize: Typography.size.lg, fontWeight: Typography.weight.bold as any }} className="text-white">Instructions</Text>
-                            <Text style={{ fontSize: Typography.size.tiny }} className="text-accent-400 font-bold uppercase tracking-widest">
+                            <Text style={{ fontSize: Typography.size.tiny }} className="text-white font-bold uppercase tracking-widest">
                                 {completedSteps.length} / {recipe.steps.length} Done
                             </Text>
                         </View>
@@ -133,7 +133,7 @@ export default function RecipeScreen() {
                                 <Pressable
                                     key={index}
                                     onPress={() => toggleStep(index)}
-                                    className={`mb-4 p-5 rounded-3xl border transition-all ${isCompleted ? 'bg-emerald-500/10 border-emerald-500/20 opacity-60' : 'bg-white/5 border-white/10'}`}
+                                    className={`mb-4 p-5 rounded-3xl border ${isCompleted ? 'bg-emerald-500/10 border-emerald-500/20 opacity-60' : 'bg-white/5 border-white/10'}`}
                                 >
                                     <View className="flex-row">
                                         <View className={`w-8 h-8 rounded-xl items-center justify-center mr-4 mt-0.5 ${isCompleted ? 'bg-emerald-500' : 'bg-accent-500 shadow-lg shadow-accent-500/30'}`}>
@@ -153,7 +153,7 @@ export default function RecipeScreen() {
                                 </Pressable>
                             );
                         })}
-                    </Animated.View>
+                    </View>
                 </ScrollView>
             </SafeAreaView>
         </View>

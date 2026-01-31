@@ -65,18 +65,18 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             </View>
 
             {recipe.macros && (
-              <View className="flex-row items-center gap-4">
+              <View className="flex-col gap-2">
                 <View className="flex-row items-center">
-                  <View className="w-1 h-1 rounded-full bg-emerald-500 mr-1.5" />
-                  <Text style={{ fontSize: 9 }} className="font-bold text-white/30 uppercase">P: <Text className="text-white/70">{recipe.macros.protein}</Text></Text>
+                  <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2" />
+                  <Text style={{ fontSize: 11 }} className="font-bold text-white/40">Protein: <Text className="text-white/80">{recipe.macros.protein}</Text></Text>
                 </View>
                 <View className="flex-row items-center">
-                  <View className="w-1 h-1 rounded-full bg-amber-500 mr-1.5" />
-                  <Text style={{ fontSize: 9 }} className="font-bold text-white/30 uppercase">C: <Text className="text-white/70">{recipe.macros.carbs}</Text></Text>
+                  <View className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2" />
+                  <Text style={{ fontSize: 11 }} className="font-bold text-white/40">Carbs: <Text className="text-white/80">{recipe.macros.carbs}</Text></Text>
                 </View>
                 <View className="flex-row items-center">
-                  <View className="w-1 h-1 rounded-full bg-rose-500 mr-1.5" />
-                  <Text style={{ fontSize: 9 }} className="font-bold text-white/30 uppercase">F: <Text className="text-white/70">{recipe.macros.fat}</Text></Text>
+                  <View className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-2" />
+                  <Text style={{ fontSize: 11 }} className="font-bold text-white/40">Fat: <Text className="text-white/80">{recipe.macros.fat}</Text></Text>
                 </View>
               </View>
             )}
@@ -94,7 +94,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
           <View className="mt-4 pt-6 border-t border-white/10">
             {/* Ingredients */}
             <View className="mb-8">
-              <Text className="text-[10px] font-black text-accent-400 uppercase tracking-[2px] mb-4">
+              <Text className="text-xs font-black text-white uppercase tracking-wide mb-4">
                 What you'll need
               </Text>
               <View className="flex-row flex-wrap">
@@ -111,7 +111,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
 
             {/* Steps */}
             <View className="mb-8">
-              <Text className="text-[10px] font-black text-accent-400 uppercase tracking-[2px] mb-4">
+              <Text className="text-xs font-black text-white uppercase tracking-wide mb-4">
                 Preparation
               </Text>
               {recipe.steps.map((step, index) => (

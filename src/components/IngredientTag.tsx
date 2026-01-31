@@ -14,16 +14,16 @@ export function IngredientTag({
   return (
     <View
       className={`mr-3 mb-3 flex-row items-center rounded-2xl px-4 py-2.5 border ${available
-        ? "bg-accent-500/10 border-accent-500/20"
-        : "bg-white/5 border-white/10"
+        ? "bg-emerald-500/10 border-emerald-500/20"
+        : "bg-rose-500/10 border-rose-500/20"
         }`}
     >
       <View
-        className={`w-1.5 h-1.5 rounded-full mr-2.5 ${available ? "bg-accent-400" : "bg-white/20"
+        className={`w-1.5 h-1.5 rounded-full mr-2.5 ${available ? "bg-emerald-400" : "bg-rose-400"
           }`}
       />
       <Text
-        className={`text-sm font-bold capitalize ${available ? "text-accent-400" : "text-white/40"
+        className={`text-sm font-bold capitalize ${available ? "text-emerald-400" : "text-rose-400"
           }`}
       >
         {name}

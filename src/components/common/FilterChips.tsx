@@ -67,10 +67,10 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
         letterSpacing: Typography.tracking.widest,
         marginBottom: Spacing.sm,
-        marginLeft: Spacing.lg,
+        marginLeft: Spacing.xl,
     },
     scrollContent: {
-        paddingLeft: Spacing.lg,
+        paddingLeft: Spacing.xl,
         gap: Spacing.sm,
     },
     chip: {

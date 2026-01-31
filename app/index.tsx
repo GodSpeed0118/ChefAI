@@ -10,10 +10,8 @@ import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AnimatedCard } from "../src/components/common/AnimatedCard";
-import { FloatingActionButton } from "../src/components/common/FloatingActionButton";
 import { GlassCard } from "../src/components/common/GlassCard";
 import { GradientButton } from "../src/components/common/GradientButton";
-import { Skeleton } from "../src/components/common/Skeleton";
 import { LoadingState } from "../src/components/LoadingState";
 import { useAuth } from "../src/context/AuthContext";
 import { useAnalyzeImage } from "../src/hooks/useAnalyzeImage";
@@ -98,7 +96,7 @@ export default function HomeScreen() {
           <LoadingState message="Analyzing your fridge contents..." />
         ) : (
           <>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
               {/* Header */}
               <Animated.View
                 entering={FadeInUp.delay(200)}
@@ -129,7 +127,7 @@ export default function HomeScreen() {
               </Animated.View>
 
               {/* Smart Scan Hero */}
-              <Animated.View entering={FadeInDown.delay(400)} className="px-6 mb-8 pt-4">
+              <Animated.View entering={FadeInDown.delay(400)} className="px-6 mb-12 pt-4">
                 <GlassCard intensity={30} style={{ padding: 0 }}>
                   <LinearGradient
                     colors={['rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.05)']}
@@ -141,7 +139,7 @@ export default function HomeScreen() {
                       </View>
                       <View className="ml-4">
                         <Text style={{ fontSize: Typography.size.lg, fontWeight: Typography.weight.black as any }} className="text-white">Smart Scan</Text>
-                        <Text style={{ fontSize: Typography.size.tiny, letterSpacing: Typography.tracking.widest }} className="text-accent-300 font-bold uppercase">AI Powered Assistant</Text>
+                        <Text style={{ fontSize: Typography.size.tiny, letterSpacing: Typography.tracking.widest }} className="text-white/60 font-bold uppercase">AI Powered Assistant</Text>
                       </View>
                     </View>
                     <Text style={{ fontSize: Typography.size.sm, lineHeight: 20 }} className="text-white/70 font-medium mb-4">
@@ -153,7 +151,7 @@ export default function HomeScreen() {
 
               {/* Fridge Scanner Section */}
               <Animated.View entering={FadeInDown.delay(800)} className="px-6">
-                <Text style={{ fontSize: Typography.size.lg, fontWeight: Typography.weight.bold as any }} className="text-white mb-5 tracking-tight">Your Kitchen</Text>
+                <Text style={{ fontSize: Typography.size.lg, fontWeight: Typography.weight.bold as any }} className="text-white mb-5 tracking-tight text-center">Scan Your Fridge</Text>
 
                 {imageUri ? (
                   <AnimatedCard className="bg-white/5 rounded-[32px] border border-white/10 overflow-hidden">
@@ -179,20 +177,37 @@ export default function HomeScreen() {
                   </AnimatedCard>
                 ) : (
                   <View className="gap-4">
-                    <Skeleton height={200} borderRadius={32} />
+                    <View className="h-[200px] rounded-[32px] bg-white/5 border-2 border-dashed border-white/20 items-center justify-center">
+                      <View className="w-16 h-16 rounded-full bg-accent-600/20 items-center justify-center mb-3">
+                        <Ionicons name="camera-outline" size={32} color={Colors.accent[400]} />
+                      </View>
+                      <Text className="text-white/60 font-semibold text-base">No photo yet</Text>
+                      <Text className="text-white/40 font-medium text-sm mt-1">Take or upload a photo to begin</Text>
+                    </View>
                     <View className="flex-row gap-4">
-                      <Skeleton height={60} borderRadius={20} style={{ flex: 1 }} />
-                      <Skeleton height={60} borderRadius={20} style={{ flex: 1 }} />
+                      <Pressable
+                        onPress={() => pickImage(true)}
+                        className="flex-1 h-[80px] rounded-[20px] bg-accent-600/20 border border-accent-600/30 items-center justify-center active:bg-accent-600/30"
+                      >
+                        <View className="flex-row items-center gap-3">
+                          <Ionicons name="camera" size={24} color={Colors.accent[500]} />
+                          <Text className="text-accent-500 font-bold text-base">Take Photo</Text>
+                        </View>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => pickImage(false)}
+                        className="flex-1 h-[80px] rounded-[20px] bg-accent-600/20 border border-accent-600/30 items-center justify-center active:bg-accent-600/30"
+                      >
+                        <View className="flex-row items-center gap-3">
+                          <Ionicons name="images" size={24} color={Colors.accent[500]} />
+                          <Text className="text-accent-500 font-bold text-base">Upload Image</Text>
+                        </View>
+                      </Pressable>
                     </View>
                   </View>
                 )}
               </Animated.View>
             </ScrollView>
-
-            <FloatingActionButton
-              onPress={() => pickImage(true)}
-              icon="scan"
-            />
           </>
         )}
       </SafeAreaView>

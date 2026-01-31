@@ -96,11 +96,11 @@ export default function ResultsScreen() {
 
               {/* Identified Ingredients Section */}
               <View className="px-6 pt-2 pb-4">
-                <View className="flex-row items-center justify-between mb-4">
-                  <Text style={{ fontSize: Typography.size.tiny, letterSpacing: Typography.tracking.widest }} className="font-black text-accent-400 uppercase">
-                    Identified Pantry
+                <View className="flex-row items-center mb-4">
+                  <Text style={{ fontSize: Typography.size.tiny, letterSpacing: Typography.tracking.widest }} className="font-black text-white/40 uppercase">
+                    Identified Items
                   </Text>
-                  <View className="bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                  <View className="bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 ml-2">
                     <Text className="text-emerald-400 text-[10px] font-black">{ingredients.length} items</Text>
                   </View>
                 </View>
