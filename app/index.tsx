@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
+import { useAuth } from "../src/context/AuthContext";
 
 const CATEGORIES = [
   { id: 'all', name: 'All', icon: 'grid-outline' },
@@ -25,6 +26,24 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState('all');
   const router = useRouter();
   const analyzeImage = useAnalyzeImage();
+  const { signOut } = useAuth();
+
+  const handleSignOut = () => {
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            await signOut();
+          },
+        },
+      ]
+    );
+  };
 
   const pickImage = async (useCamera: boolean) => {
     if (useCamera && !Device.isDevice && Platform.OS !== 'web') {
@@ -108,12 +127,20 @@ export default function HomeScreen() {
                 chef<Text className="text-accent-500">ai</Text>.
               </Text>
             </View>
-            <Pressable
-              onPress={() => router.push("/saved")}
-              className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
-            >
-              <Ionicons name="heart-outline" size={22} color="white" />
-            </Pressable>
+            <View className="flex-row gap-3">
+              <Pressable
+                onPress={() => router.push("/saved")}
+                className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
+              >
+                <Ionicons name="heart-outline" size={22} color="white" />
+              </Pressable>
+              <Pressable
+                onPress={handleSignOut}
+                className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
+              >
+                <Ionicons name="log-out-outline" size={22} color="white" />
+              </Pressable>
+            </View>
           </View>
 
 

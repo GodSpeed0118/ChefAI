@@ -1,52 +1,117 @@
 import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Recipe } from '../types/recipe';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
-const STORAGE_KEY = '@chefai_saved_recipes';
+interface SavedRecipeRow {
+    id: string;
+    user_id: string;
+    recipe_data: Recipe;
+    created_at: string;
+}
 
 export function useSavedRecipes() {
     const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { user } = useAuth();
 
     useEffect(() => {
-        loadSavedRecipes();
-    }, []);
+        if (user) {
+            loadSavedRecipes();
+        } else {
+            // Clear recipes if user is not authenticated
+            setSavedRecipes([]);
+            setIsLoading(false);
+        }
+    }, [user]);
 
     const loadSavedRecipes = async () => {
+        if (!user) {
+            setSavedRecipes([]);
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            const storedData = await AsyncStorage.getItem(STORAGE_KEY);
-            if (storedData) {
-                setSavedRecipes(JSON.parse(storedData));
+            setIsLoading(true);
+            const { data, error } = await supabase
+                .from('saved_recipes')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Failed to load saved recipes:', error);
+                setSavedRecipes([]);
+            } else {
+                const recipes = (data as SavedRecipeRow[]).map(row => row.recipe_data);
+                setSavedRecipes(recipes);
             }
         } catch (error) {
             console.error('Failed to load saved recipes:', error);
+            setSavedRecipes([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const getStoredRecipes = async (): Promise<Recipe[]> => {
-        const storedData = await AsyncStorage.getItem(STORAGE_KEY);
-        return storedData ? JSON.parse(storedData) : [];
-    };
-
     const saveRecipe = async (recipe: Recipe) => {
+        if (!user) {
+            console.error('User must be authenticated to save recipes');
+            return;
+        }
+
         try {
-            const current = await getStoredRecipes();
-            const updatedRecipes = [recipe, ...current];
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedRecipes));
-            setSavedRecipes(updatedRecipes);
+            const { error } = await supabase
+                .from('saved_recipes')
+                .insert({
+                    user_id: user.id,
+                    recipe_data: recipe,
+                });
+
+            if (error) {
+                console.error('Failed to save recipe:', error);
+            } else {
+                // Optimistically update local state
+                setSavedRecipes(prev => [recipe, ...prev]);
+            }
         } catch (error) {
             console.error('Failed to save recipe:', error);
         }
     };
 
     const removeRecipe = async (recipeName: string) => {
+        if (!user) {
+            console.error('User must be authenticated to remove recipes');
+            return;
+        }
+
         try {
-            const current = await getStoredRecipes();
-            const updatedRecipes = current.filter(r => r.name !== recipeName);
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedRecipes));
-            setSavedRecipes(updatedRecipes);
+            // Find the recipe to delete by querying for matching recipe_data->name
+            const { data: recipesToDelete, error: fetchError } = await supabase
+                .from('saved_recipes')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('recipe_data->>name', recipeName);
+
+            if (fetchError) {
+                console.error('Failed to find recipe:', fetchError);
+                return;
+            }
+
+            if (recipesToDelete && recipesToDelete.length > 0) {
+                const { error: deleteError } = await supabase
+                    .from('saved_recipes')
+                    .delete()
+                    .eq('id', recipesToDelete[0].id);
+
+                if (deleteError) {
+                    console.error('Failed to remove recipe:', deleteError);
+                } else {
+                    // Optimistically update local state
+                    setSavedRecipes(prev => prev.filter(r => r.name !== recipeName));
+                }
+            }
         } catch (error) {
             console.error('Failed to remove recipe:', error);
         }
