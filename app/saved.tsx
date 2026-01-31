@@ -1,11 +1,13 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LoadingState } from "../src/components/LoadingState";
 import { RecipeCard } from "../src/components/RecipeCard";
 import { useSavedRecipes } from "../src/hooks/useSavedRecipes";
-import { LoadingState } from "../src/components/LoadingState";
-import { StatusBar } from "expo-status-bar";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Gradients } from "../src/theme/Gradients";
 
 export default function SavedRecipesScreen() {
     const router = useRouter();
@@ -16,43 +18,54 @@ export default function SavedRecipesScreen() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-primary-950">
-            <StatusBar style="light" />
+        <View className="flex-1 bg-primary-950">
+            <LinearGradient
+                colors={Gradients.background as any}
+                style={StyleSheet.absoluteFill}
+            />
+            <SafeAreaView className="flex-1">
+                <StatusBar style="light" />
 
-            {/* Header */}
-            <View className="px-6 py-4 flex-row items-center justify-between border-b border-white/10">
-                <Pressable
-                    onPress={() => router.back()}
-                    className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
+                {/* Header */}
+                <View className="px-6 py-6 flex-row items-center justify-between">
+                    <Pressable
+                        onPress={() => router.back()}
+                        className="w-11 h-11 rounded-2xl bg-white/5 items-center justify-center border border-white/10 active:bg-white/10"
+                    >
+                        <Ionicons name="arrow-back" size={22} color="white" />
+                    </Pressable>
+                    <Text className="text-xl font-black text-white italic tracking-tight">Saved <Text className="text-accent-500">Cookbook</Text></Text>
+                    <View className="w-11" />
+                </View>
+
+                <ScrollView
+                    className="flex-1 px-6"
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 40 }}
                 >
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </Pressable>
-                <Text className="text-xl font-black text-white italic">Saved Cookbooks</Text>
-                {/* Spacer */}
-                <View className="w-10" />
-            </View>
-
-            <ScrollView
-                className="flex-1 px-6 pt-6"
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 40 }}
-            >
-                {savedRecipes.length === 0 ? (
-                    <View className="flex-1 items-center justify-center pt-20">
-                        <View className="w-20 h-20 bg-white/10 rounded-full items-center justify-center mb-6">
-                            <Ionicons name="heart-outline" size={40} color="rgba(255,255,255,0.3)" />
+                    {savedRecipes.length === 0 ? (
+                        <View className="flex-1 items-center justify-center pt-32">
+                            <View className="w-24 h-24 bg-white/5 rounded-[32px] items-center justify-center mb-6 border border-white/10">
+                                <Ionicons name="heart" size={40} color="rgba(255,255,255,0.1)" />
+                            </View>
+                            <Text className="text-2xl font-black text-white text-center mb-2">Empty Cookbook</Text>
+                            <Text className="text-white/40 text-center leading-6 max-w-[250px] font-medium">
+                                Your favorite recipes will appear here once you save them.
+                            </Text>
                         </View>
-                        <Text className="text-xl font-bold text-white text-center mb-2">No saved recipes yet</Text>
-                        <Text className="text-white/50 text-center leading-6 max-w-[250px]">
-                            Tap the heart icon on any recipe to save it for later.
-                        </Text>
-                    </View>
-                ) : (
-                    savedRecipes.map((recipe, index) => (
-                        <RecipeCard key={`${recipe.name}-${index}`} recipe={recipe} />
-                    ))
-                )}
-            </ScrollView>
-        </SafeAreaView>
+                    ) : (
+                        <View className="pt-2">
+                            {savedRecipes.map((recipe, index) => (
+                                <RecipeCard key={`${recipe.name}-${index}`} recipe={recipe} />
+                            ))}
+                        </View>
+                    )}
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    // Add custom styles if needed
+});

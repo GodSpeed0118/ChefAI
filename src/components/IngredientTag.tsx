@@ -1,5 +1,4 @@
-import { View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Text, View } from "react-native";
 
 type IngredientTagProps = {
   name: string;
@@ -15,21 +14,21 @@ export function IngredientTag({
   return (
     <View
       className={`mr-3 mb-3 flex-row items-center rounded-2xl px-4 py-2.5 border ${available
-          ? "bg-accent-50 border-accent-100"
-          : "bg-primary-50 border-primary-100"
+        ? "bg-accent-500/10 border-accent-500/20"
+        : "bg-white/5 border-white/10"
         }`}
     >
       <View
-        className={`w-1.5 h-1.5 rounded-full mr-2.5 ${available ? "bg-accent-500" : "bg-primary-300"
+        className={`w-1.5 h-1.5 rounded-full mr-2.5 ${available ? "bg-accent-400" : "bg-white/20"
           }`}
       />
       <Text
-        className={`text-sm font-bold capitalize ${available ? "text-accent-700" : "text-primary-600"
+        className={`text-sm font-bold capitalize ${available ? "text-accent-400" : "text-white/40"
           }`}
       >
         {name}
         {quantity && (
-          <Text className="text-[10px] font-black opacity-40"> • {quantity}</Text>
+          <Text className="text-[10px] font-black opacity-30"> • {quantity}</Text>
         )}
       </Text>
     </View>

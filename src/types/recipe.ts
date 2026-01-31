@@ -3,6 +3,8 @@ import { z } from "zod";
 export const IngredientSchema = z.object({
   name: z.string(),
   quantity: z.string().optional(),
+  amount: z.number().optional(),
+  unit: z.string().optional(),
   available: z.boolean(),
 });
 
@@ -15,10 +17,18 @@ export const IdentifiedIngredientsSchema = z.object({
 export type IdentifiedIngredients = z.infer<typeof IdentifiedIngredientsSchema>;
 
 export const RecipeSchema = z.object({
+  id: z.string().optional(),
   name: z.string(),
   difficulty: z.number().min(1).max(5),
   calories: z.number(),
+  macros: z.object({
+    protein: z.string(),
+    carbs: z.string(),
+    fat: z.string(),
+  }).optional(),
   prepTime: z.string(),
+  dietType: z.string().optional(),
+  tags: z.array(z.string()).optional(),
   ingredients: z.array(IngredientSchema),
   steps: z.array(z.string()),
 });

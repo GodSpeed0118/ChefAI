@@ -1,76 +1,100 @@
-import { useState } from "react";
-import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import type { Recipe } from "../types/recipe";
-import { IngredientTag } from "./IngredientTag";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSavedRecipes } from "../hooks/useSavedRecipes";
+import { Colors } from "../theme/Colors";
+import { Typography } from "../theme/Typography";
+import type { Recipe } from "../types/recipe";
+import { GlassCard } from "./common/GlassCard";
+import { GradientButton } from "./common/GradientButton";
+import { IngredientTag } from "./IngredientTag";
 
 type RecipeCardProps = {
   recipe: Recipe;
 };
 
-function DifficultyStars({ level }: { level: number }) {
-  return (
-    <View className="flex-row">
-      {Array.from({ length: 5 }, (_, i) => (
-        <Ionicons
-          key={i}
-          name={i < level ? "star" : "star-outline"}
-          size={14}
-          color={i < level ? "#f59e0b" : "#cbd5e1"}
-          style={{ marginRight: 2 }}
-        />
-      ))}
-    </View>
-  );
-}
-
 export function RecipeCard({ recipe }: RecipeCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { isSaved, toggleSave } = useSavedRecipes();
   const saved = isSaved(recipe.name);
+  const router = useRouter();
+
+  const usedCount = recipe.ingredients.filter(i => i.available).length;
+  const totalCount = recipe.ingredients.length;
+
+  const navigateToDetail = () => {
+    router.push({
+      pathname: '/recipe/[id]',
+      params: { id: recipe.name, recipe: JSON.stringify(recipe) }
+    });
+  };
 
   return (
-    <View className="bg-white rounded-[40px] shadow-2xl overflow-hidden border border-primary-100 mb-6">
-      <View className="p-5">
+    <GlassCard intensity={20} style={styles.card}>
+      <Pressable onPress={() => setExpanded(!expanded)} className="p-5">
         <View className="flex-row justify-between items-start mb-4">
-          <Pressable onPress={() => setExpanded(!expanded)} className="flex-1 pr-4 active:opacity-70">
-            <Text className="text-2xl font-black text-primary-950 leading-8 mb-2">
+          <View className="flex-1 pr-4">
+            <Text style={{ fontSize: Typography.size.xl, fontWeight: Typography.weight.black as any }} className="text-white leading-8 mb-2">
               {recipe.name}
             </Text>
-            <View className="flex-row items-center flex-wrap gap-2">
-              <View className="bg-accent-50 px-3 py-1 rounded-full border border-accent-100">
-                <Text className="text-accent-600 text-[10px] font-black uppercase tracking-widest">{recipe.difficulty}</Text>
+
+            <View className="flex-row items-center flex-wrap gap-2 mb-3">
+              {recipe.dietType && (
+                <View className="bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/30">
+                  <Text className="text-emerald-400 text-[10px] font-black uppercase tracking-widest">{recipe.dietType}</Text>
+                </View>
+              )}
+              <View className="flex-row items-center">
+                <Ionicons name="flame" size={14} color={Colors.accent[500]} />
+                <Text style={{ fontSize: Typography.size.tiny }} className="ml-1 font-bold text-white/60">{recipe.calories} kcal</Text>
               </View>
               <View className="flex-row items-center ml-2">
-                <Ionicons name="flame" size={14} color="#6366f1" />
-                <Text className="ml-1 text-xs font-bold text-primary-400">{recipe.calories} kcal</Text>
-              </View>
-              <View className="flex-row items-center ml-2">
-                <Ionicons name="time" size={14} color="#64748b" />
-                <Text className="ml-1 text-xs font-bold text-primary-400">{recipe.prepTime}</Text>
+                <Ionicons name="time" size={14} color="#94a3b8" />
+                <Text style={{ fontSize: Typography.size.tiny }} className="ml-1 font-bold text-white/60">{recipe.prepTime}</Text>
               </View>
             </View>
-          </Pressable>
-          <View className="flex-row gap-2">
-            <Pressable
-              onPress={() => setExpanded(!expanded)}
-              className="w-12 h-12 rounded-full bg-primary-50 items-center justify-center active:opacity-70"
-            >
-              <Ionicons
-                name={expanded ? "chevron-up" : "chevron-down"}
-                size={24}
-                color={expanded ? "#6366f1" : "#94a3b8"}
-              />
-            </Pressable>
+
+            <View className="flex-row items-center mb-3">
+              <View className="bg-white/5 py-1 px-3 rounded-lg border border-white/10 flex-row items-center">
+                <View className={`w-1.5 h-1.5 rounded-full mr-2 ${usedCount === totalCount ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                <Text style={{ fontSize: Typography.size.tiny }} className="text-white/60 font-black uppercase tracking-widest">
+                  {usedCount}/{totalCount} Ingredients
+                </Text>
+              </View>
+            </View>
+
+            {recipe.macros && (
+              <View className="flex-row items-center gap-4">
+                <View className="flex-row items-center">
+                  <View className="w-1 h-1 rounded-full bg-emerald-500 mr-1.5" />
+                  <Text style={{ fontSize: 9 }} className="font-bold text-white/30 uppercase">P: <Text className="text-white/70">{recipe.macros.protein}</Text></Text>
+                </View>
+                <View className="flex-row items-center">
+                  <View className="w-1 h-1 rounded-full bg-amber-500 mr-1.5" />
+                  <Text style={{ fontSize: 9 }} className="font-bold text-white/30 uppercase">C: <Text className="text-white/70">{recipe.macros.carbs}</Text></Text>
+                </View>
+                <View className="flex-row items-center">
+                  <View className="w-1 h-1 rounded-full bg-rose-500 mr-1.5" />
+                  <Text style={{ fontSize: 9 }} className="font-bold text-white/30 uppercase">F: <Text className="text-white/70">{recipe.macros.fat}</Text></Text>
+                </View>
+              </View>
+            )}
+          </View>
+          <View className="w-10 h-10 rounded-2xl bg-white/5 items-center justify-center border border-white/10">
+            <Ionicons
+              name={expanded ? "chevron-up" : "chevron-down"}
+              size={20}
+              color="white"
+            />
           </View>
         </View>
 
         {expanded && (
-          <View className="mt-4 pt-6 border-t border-primary-50">
+          <View className="mt-4 pt-6 border-t border-white/10">
             {/* Ingredients */}
             <View className="mb-8">
-              <Text className="text-xs font-black text-primary-300 uppercase tracking-widest mb-4">
+              <Text className="text-[10px] font-black text-accent-400 uppercase tracking-[2px] mb-4">
                 What you'll need
               </Text>
               <View className="flex-row flex-wrap">
@@ -86,38 +110,49 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             </View>
 
             {/* Steps */}
-            <View className="mb-6">
-              <Text className="text-xs font-black text-primary-300 uppercase tracking-widest mb-4">
+            <View className="mb-8">
+              <Text className="text-[10px] font-black text-accent-400 uppercase tracking-[2px] mb-4">
                 Preparation
               </Text>
               {recipe.steps.map((step, index) => (
                 <View key={index} className="mb-5 flex-row">
-                  <View className="w-8 h-8 rounded-xl bg-primary-950 items-center justify-center mr-4 mt-0.5 shadow-sm">
+                  <View className="w-7 h-7 rounded-lg bg-accent-500 items-center justify-center mr-4 mt-0.5">
                     <Text className="text-white text-xs font-black">
                       {index + 1}
                     </Text>
                   </View>
-                  <Text className="flex-1 text-base leading-6 text-primary-900 font-medium">
+                  <Text className="flex-1 text-[15px] leading-6 text-white/80 font-medium">
                     {step}
                   </Text>
                 </View>
               ))}
             </View>
 
-            <Pressable
-              className={`${saved ? "bg-red-500" : "bg-emerald-500"} rounded-3xl py-5 items-center justify-center shadow-lg active:opacity-90 active:scale-[0.98]`}
-              onPress={() => toggleSave(recipe)}
-            >
-              <View className="flex-row items-center">
-                <Ionicons name={saved ? "heart" : "heart-outline"} size={22} color="white" />
-                <Text className="text-white font-black text-xl tracking-tight ml-3">
-                  {saved ? "Saved to Favorites" : "Save Recipe"}
-                </Text>
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <GradientButton
+                  title="Cook with AI"
+                  onPress={navigateToDetail}
+                  icon={<Ionicons name="restaurant" size={20} color="white" />}
+                />
               </View>
-            </Pressable>
+              <Pressable
+                onPress={() => toggleSave(recipe)}
+                className={`w-16 h-16 rounded-2xl items-center justify-center border transition-all ${saved ? 'bg-rose-500/20 border-rose-500/30' : 'bg-white/5 border-white/10'}`}
+              >
+                <Ionicons name={saved ? "heart" : "heart-outline"} size={24} color={saved ? Colors.rose[500] : "white"} />
+              </Pressable>
+            </View>
           </View>
         )}
-      </View>
-    </View>
+      </Pressable>
+    </GlassCard>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    marginBottom: 20,
+    padding: 0,
+  }
+});

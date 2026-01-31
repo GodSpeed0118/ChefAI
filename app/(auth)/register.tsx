@@ -1,19 +1,26 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
+import { GradientButton } from "../../src/components/common/GradientButton";
 import { useAuth } from "../../src/context/AuthContext";
+import { Colors } from "../../src/theme/Colors";
+import { Gradients } from "../../src/theme/Gradients";
+import { Spacing } from "../../src/theme/Spacing";
+import { Typography } from "../../src/theme/Typography";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
@@ -21,7 +28,8 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
@@ -33,267 +41,176 @@ export default function RegisterScreen() {
   const { signUp } = useAuth();
 
   const validateForm = (): boolean => {
-    const newErrors: {
-      email?: string;
-      password?: string;
-      confirmPassword?: string;
-    } = {};
+    const newErrors: any = {};
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Valid email required";
 
-    // Email validation
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
+    if (!password) newErrors.password = "Password is required";
+    else if (password.length < 6) newErrors.password = "Min 6 characters";
 
-    // Password validation
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    // Confirm password validation
-    if (!confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
+    if (password !== confirmPassword) newErrors.confirmPassword = "Passwords must match";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSignUp = async () => {
-    // Clear previous errors
     setErrors({});
-
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setIsLoading(true);
 
     try {
       const { error } = await signUp(email.trim(), password);
-
       if (error) {
         setErrors({ general: error });
       } else {
-        // Show success message
-        Alert.alert(
-          "Account Created",
-          "Your account has been created successfully! You can now start saving recipes.",
-          [{ text: "Get Started", onPress: () => {} }]
-        );
-        // Navigation happens automatically via auth state change
+        setSuccess(true);
       }
     } catch (error) {
-      setErrors({ general: "An unexpected error occurred. Please try again." });
+      setErrors({ general: "An unexpected error occurred." });
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (success) {
+    return (
+      <View className="flex-1 bg-primary-950">
+        <LinearGradient colors={Gradients.background as any} style={StyleSheet.absoluteFill} />
+        <SafeAreaView className="flex-1 items-center justify-center px-8">
+          <Animated.View entering={FadeInUp.duration(600)} className="items-center">
+            <View className="w-24 h-24 rounded-[40px] bg-emerald-500 items-center justify-center shadow-xl shadow-emerald-500/40 mb-8">
+              <Ionicons name="mail-unread" size={44} color="white" />
+            </View>
+            <Text style={{ fontSize: Typography.size.xxl, fontWeight: Typography.weight.black as any }} className="text-white text-center mb-4">Check Your Inbox</Text>
+            <Text style={{ fontSize: Typography.size.md }} className="text-white/60 text-center mb-12">
+              We've sent a verification link to {email}. Please verify your account to continue.
+            </Text>
+            <View className="w-full">
+              <GradientButton title="Back to Login" onPress={() => router.replace("/(auth)/login")} />
+            </View>
+          </Animated.View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-primary-950">
-      <StatusBar style="light" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View className="flex-1 px-6 pt-8 pb-6">
-            {/* Header */}
-            <View className="mb-10">
-              <View className="flex-row items-center mb-4">
-                <Ionicons name="basket" size={32} color="#6366f1" />
-                <Text className="ml-2 text-3xl font-black text-white italic tracking-tighter">
+    <View className="flex-1 bg-primary-950">
+      <LinearGradient colors={Gradients.background as any} style={StyleSheet.absoluteFill} />
+      <SafeAreaView className="flex-1">
+        <StatusBar style="light" />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View className="flex-1 px-8 pt-10 pb-8">
+              <Animated.View entering={FadeInUp.duration(800).delay(200)} className="items-center mb-12">
+                <View className="w-16 h-16 rounded-[24px] bg-accent-500 items-center justify-center shadow-lg mb-4">
+                  <Ionicons name="restaurant" size={30} color="white" />
+                </View>
+                <Text style={{ fontSize: Typography.size.huge, fontWeight: Typography.weight.black as any }} className="text-white italic tracking-tighter">
                   chef<Text className="text-accent-500">ai</Text>.
                 </Text>
-              </View>
-              <Text className="text-white text-4xl font-black mb-2">Create Account</Text>
-              <Text className="text-white/60 text-base">
-                Join ChefAI and start saving your favorite recipes
-              </Text>
-            </View>
+              </Animated.View>
 
-            {/* Error Message */}
-            {errors.general && (
-              <View className="mb-6 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex-row items-center">
-                <Ionicons name="alert-circle" size={20} color="#ef4444" />
-                <Text className="ml-3 text-red-400 flex-1">{errors.general}</Text>
-              </View>
-            )}
+              <Animated.View entering={FadeInDown.duration(600).delay(400)}>
+                <Text style={{ fontSize: Typography.size.xxl, fontWeight: Typography.weight.black as any }} className="text-white mb-2">Create Account</Text>
+                <Text style={{ fontSize: Typography.size.md }} className="text-white/40 font-medium mb-8">Join the elite culinary circle.</Text>
+              </Animated.View>
 
-            {/* Email Input */}
-            <View className="mb-4">
-              <Text className="text-white/80 text-sm font-semibold mb-2 ml-1">Email</Text>
-              <View
-                className={`flex-row items-center bg-white/5 border rounded-2xl px-4 ${
-                  errors.email ? "border-red-500/50" : "border-white/10"
-                }`}
-              >
-                <Ionicons name="mail-outline" size={20} color="#9ca3af" />
-                <TextInput
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    if (errors.email) setErrors({ ...errors, email: undefined });
-                  }}
-                  placeholder="your@email.com"
-                  placeholderTextColor="#6b7280"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                  className="flex-1 text-white py-4 px-3 text-base"
-                  editable={!isLoading}
-                />
-              </View>
-              {errors.email && (
-                <Text className="text-red-400 text-xs mt-1 ml-1">{errors.email}</Text>
+              {errors.general && (
+                <Animated.View entering={FadeInDown} className="mb-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex-row items-center">
+                  <Ionicons name="alert-circle" size={20} color={Colors.rose[500]} />
+                  <Text className="ml-3 text-rose-400 font-bold flex-1">{errors.general}</Text>
+                </Animated.View>
               )}
-            </View>
 
-            {/* Password Input */}
-            <View className="mb-4">
-              <Text className="text-white/80 text-sm font-semibold mb-2 ml-1">Password</Text>
-              <View
-                className={`flex-row items-center bg-white/5 border rounded-2xl px-4 ${
-                  errors.password ? "border-red-500/50" : "border-white/10"
-                }`}
-              >
-                <Ionicons name="lock-closed-outline" size={20} color="#9ca3af" />
-                <TextInput
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    if (errors.password) setErrors({ ...errors, password: undefined });
-                  }}
-                  placeholder="At least 6 characters"
-                  placeholderTextColor="#6b7280"
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  autoComplete="password"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                  className="flex-1 text-white py-4 px-3 text-base"
-                  editable={!isLoading}
-                />
-                <Pressable onPress={() => setShowPassword(!showPassword)} disabled={isLoading}>
-                  <Ionicons
-                    name={showPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color="#9ca3af"
-                  />
-                </Pressable>
+              <View style={{ gap: Spacing.lg }}>
+                <Animated.View entering={FadeInDown.duration(600).delay(600)}>
+                  <Text style={styles.inputLabel}>Email Address</Text>
+                  <View className={`flex-row items-center bg-white/5 border rounded-2xl px-4 transition-all ${focusedInput === 'email' ? "border-accent-500/50 bg-white/10" : errors.email ? "border-rose-500/50" : "border-white/10"}`}>
+                    <Ionicons name="mail-outline" size={20} color="white" style={{ opacity: focusedInput === 'email' ? 0.8 : 0.3 }} />
+                    <TextInput
+                      value={email}
+                      onChangeText={setEmail}
+                      onFocus={() => setFocusedInput('email')}
+                      onBlur={() => setFocusedInput(null)}
+                      placeholder="Enter your email"
+                      placeholderTextColor="rgba(255,255,255,0.2)"
+                      className="flex-1 text-white py-5 px-4 text-base font-medium"
+                      autoCapitalize="none"
+                      editable={!isLoading}
+                    />
+                  </View>
+                </Animated.View>
+
+                <Animated.View entering={FadeInDown.duration(600).delay(1000)}>
+                  <Text style={styles.inputLabel}>Secure Password</Text>
+                  <View className={`flex-row items-center bg-white/5 border rounded-2xl px-4 ${focusedInput === 'password' ? "border-accent-500/50 bg-white/10" : errors.password ? "border-rose-500/50" : "border-white/10"}`}>
+                    <Ionicons name="lock-closed-outline" size={20} color="white" style={{ opacity: focusedInput === 'password' ? 0.8 : 0.3 }} />
+                    <TextInput
+                      value={password}
+                      onChangeText={setPassword}
+                      onFocus={() => setFocusedInput('password')}
+                      onBlur={() => setFocusedInput(null)}
+                      placeholder="Min 6 characters"
+                      placeholderTextColor="rgba(255,255,255,0.2)"
+                      secureTextEntry={!showPassword}
+                      className="flex-1 text-white py-5 px-4 text-base font-medium"
+                      editable={!isLoading}
+                    />
+                    <Pressable onPress={() => setShowPassword(!showPassword)}>
+                      <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="white" style={{ opacity: 0.3 }} />
+                    </Pressable>
+                  </View>
+                </Animated.View>
+
+                <Animated.View entering={FadeInDown.duration(600).delay(1200)}>
+                  <Text style={styles.inputLabel}>Confirm Password</Text>
+                  <View className={`flex-row items-center bg-white/5 border rounded-2xl px-4 ${focusedInput === 'confirm' ? "border-accent-500/50 bg-white/10" : errors.confirmPassword ? "border-rose-500/50" : "border-white/10"}`}>
+                    <Ionicons name="checkmark-circle-outline" size={20} color="white" style={{ opacity: focusedInput === 'confirm' ? 0.8 : 0.3 }} />
+                    <TextInput
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
+                      onFocus={() => setFocusedInput('confirm')}
+                      onBlur={() => setFocusedInput(null)}
+                      placeholder="Repeat password"
+                      placeholderTextColor="rgba(255,255,255,0.2)"
+                      secureTextEntry={!showPassword}
+                      className="flex-1 text-white py-5 px-4 text-base font-medium"
+                      editable={!isLoading}
+                    />
+                  </View>
+                </Animated.View>
+
+                <Animated.View entering={FadeInDown.duration(600).delay(1400)} className="mt-4">
+                  <GradientButton title={isLoading ? "Enrolling..." : "Create Account"} onPress={handleSignUp} disabled={isLoading} />
+                </Animated.View>
               </View>
-              {errors.password && (
-                <Text className="text-red-400 text-xs mt-1 ml-1">{errors.password}</Text>
-              )}
+
+              <Animated.View entering={FadeInDown.duration(600).delay(1600)} className="flex-1 justify-end pt-12">
+                <View className="flex-row justify-center items-center">
+                  <Text style={{ fontSize: Typography.size.md }} className="text-white/40 font-medium">Have access? </Text>
+                  <Pressable onPress={() => router.push("/(auth)/login")}>
+                    <Text style={{ fontSize: Typography.size.md }} className="text-accent-400 font-black">Sign In</Text>
+                  </Pressable>
+                </View>
+              </Animated.View>
             </View>
-
-            {/* Confirm Password Input */}
-            <View className="mb-6">
-              <Text className="text-white/80 text-sm font-semibold mb-2 ml-1">
-                Confirm Password
-              </Text>
-              <View
-                className={`flex-row items-center bg-white/5 border rounded-2xl px-4 ${
-                  errors.confirmPassword ? "border-red-500/50" : "border-white/10"
-                }`}
-              >
-                <Ionicons name="lock-closed-outline" size={20} color="#9ca3af" />
-                <TextInput
-                  value={confirmPassword}
-                  onChangeText={(text) => {
-                    setConfirmPassword(text);
-                    if (errors.confirmPassword)
-                      setErrors({ ...errors, confirmPassword: undefined });
-                  }}
-                  placeholder="Re-enter your password"
-                  placeholderTextColor="#6b7280"
-                  secureTextEntry={!showConfirmPassword}
-                  autoCapitalize="none"
-                  autoComplete="password"
-                  autoCorrect={false}
-                  returnKeyType="done"
-                  onSubmitEditing={handleSignUp}
-                  className="flex-1 text-white py-4 px-3 text-base"
-                  editable={!isLoading}
-                />
-                <Pressable
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  disabled={isLoading}
-                >
-                  <Ionicons
-                    name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
-                    size={20}
-                    color="#9ca3af"
-                  />
-                </Pressable>
-              </View>
-              {errors.confirmPassword && (
-                <Text className="text-red-400 text-xs mt-1 ml-1">{errors.confirmPassword}</Text>
-              )}
-            </View>
-
-            {/* Sign Up Button */}
-            <Pressable
-              onPress={handleSignUp}
-              disabled={isLoading}
-              className={`bg-emerald-500 rounded-2xl py-4 mb-4 shadow-lg ${
-                isLoading ? "opacity-60" : "active:bg-emerald-600"
-              }`}
-            >
-              <View className="flex-row items-center justify-center">
-                {isLoading ? (
-                  <>
-                    <Ionicons name="hourglass-outline" size={20} color="white" />
-                    <Text className="text-white text-base font-bold ml-2">Creating account...</Text>
-                  </>
-                ) : (
-                  <>
-                    <Text className="text-white text-base font-bold mr-2">Create Account</Text>
-                    <Ionicons name="checkmark-circle" size={20} color="white" />
-                  </>
-                )}
-              </View>
-            </Pressable>
-
-            {/* Terms Notice */}
-            <Text className="text-white/40 text-xs text-center mb-6 px-4 leading-5">
-              By creating an account, you agree to our Terms of Service and Privacy Policy
-            </Text>
-
-            {/* Divider */}
-            <View className="flex-row items-center my-4">
-              <View className="flex-1 h-px bg-white/10" />
-              <Text className="text-white/40 text-sm mx-4">or</Text>
-              <View className="flex-1 h-px bg-white/10" />
-            </View>
-
-            {/* Sign In Link */}
-            <View className="flex-row justify-center items-center">
-              <Text className="text-white/60 text-base">Already have an account? </Text>
-              <Pressable
-                onPress={() => router.push("/(auth)/login")}
-                disabled={isLoading}
-                className="active:opacity-70"
-              >
-                <Text className="text-white text-base font-bold">Sign In</Text>
-              </Pressable>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  inputLabel: {
+    fontSize: Typography.size.tiny,
+    letterSpacing: Typography.tracking.widest,
+    color: 'rgba(255,255,255,0.3)',
+    fontWeight: Typography.weight.black as any,
+    textTransform: 'uppercase',
+    marginBottom: Spacing.sm,
+    marginLeft: Spacing.xs,
+  },
+});

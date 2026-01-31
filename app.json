@@ -3,6 +3,7 @@
     "name": "ChefAI",
     "slug": "ChefAI",
     "version": "1.0.0",
+    "projectId": "chefai",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "chefai",
@@ -45,7 +46,8 @@
           "photosPermission": "ChefAI needs access to your photos to analyze fridge contents.",
           "cameraPermission": "ChefAI needs access to your camera to photograph your fridge."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

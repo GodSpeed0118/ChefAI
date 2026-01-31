@@ -1,29 +1,31 @@
-import { useState } from "react";
-import { View, Text, Pressable, Alert, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as Device from "expo-device";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useAnalyzeImage } from "../src/hooks/useAnalyzeImage";
-import { LoadingState } from "../src/components/LoadingState";
-import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import * as Device from "expo-device";
-import { Platform } from "react-native";
+import { useState } from "react";
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AnimatedCard } from "../src/components/common/AnimatedCard";
+import { FloatingActionButton } from "../src/components/common/FloatingActionButton";
+import { GlassCard } from "../src/components/common/GlassCard";
+import { GradientButton } from "../src/components/common/GradientButton";
+import { Skeleton } from "../src/components/common/Skeleton";
+import { LoadingState } from "../src/components/LoadingState";
 import { useAuth } from "../src/context/AuthContext";
+import { useAnalyzeImage } from "../src/hooks/useAnalyzeImage";
+import { Colors } from "../src/theme/Colors";
+import { Gradients } from "../src/theme/Gradients";
+import { Spacing } from "../src/theme/Spacing";
+import { Typography } from "../src/theme/Typography";
 
-const CATEGORIES = [
-  { id: 'all', name: 'All', icon: 'grid-outline' },
-  { id: 'bakery', name: 'Bakery', icon: 'restaurant-outline' },
-  { id: 'fruits', name: 'Fruits', icon: 'nutrition-outline' },
-  { id: 'meat', name: 'Meat', icon: 'fast-food-outline' },
-  { id: 'vegetables', name: 'Veggie', icon: 'leaf-outline' },
-  { id: 'dairy', name: 'Dairy', icon: 'water-outline' },
-];
+// Quick category UI removed for a cleaner premium UX
 
 export default function HomeScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState('all');
   const router = useRouter();
   const analyzeImage = useAnalyzeImage();
   const { signOut } = useAuth();
@@ -34,13 +36,7 @@ export default function HomeScreen() {
       "Are you sure you want to sign out?",
       [
         { text: "Cancel", style: "cancel" },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            await signOut();
-          },
-        },
+        { text: "Sign Out", style: "destructive", onPress: async () => await signOut() },
       ]
     );
   };
@@ -49,12 +45,8 @@ export default function HomeScreen() {
     if (useCamera && !Device.isDevice && Platform.OS !== 'web') {
       Alert.alert(
         "Simulator Mode",
-        "The camera is not available on this simulator. I've automatically loaded a sample fridge image for you to test the analysis!",
-        [{
-          text: "Great!", onPress: () => {
-            setImageUri("https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop");
-          }
-        }]
+        "The camera is not available on this simulator. Loading a sample image!",
+        [{ text: "Great!", onPress: () => setImageUri("https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop") }]
       );
       return;
     }
@@ -64,19 +56,11 @@ export default function HomeScreen() {
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert(
-        "Permission Required",
-        useCamera
-          ? "Camera access is needed to photograph your fridge."
-          : "Photo library access is needed to select an image.",
-      );
+      Alert.alert("Permission Required", "Access is needed to pick an image.");
       return;
     }
 
-    const options: ImagePicker.ImagePickerOptions = {
-      mediaTypes: ["images"],
-      quality: 0.8,
-    };
+    const options: ImagePicker.ImagePickerOptions = { mediaTypes: ["images"], quality: 0.8 };
 
     try {
       const result = useCamera
@@ -88,179 +72,130 @@ export default function HomeScreen() {
       }
     } catch (error) {
       console.error("Image picking error:", error);
-      Alert.alert("Error", "An unexpected error occurred while picking the image.");
     }
   };
 
   const handleAnalyze = () => {
     if (!imageUri) return;
-
-    analyzeImage.mutate(
-      { uri: imageUri },
-      {
-        onSuccess: (data) => {
-          router.push({
-            pathname: "/results",
-            params: { ingredients: JSON.stringify(data.ingredients) },
-          });
-        },
-        onError: (error) => {
-          Alert.alert("Analysis Failed", error.message);
-        },
+    analyzeImage.mutate({ uri: imageUri }, {
+      onSuccess: (data) => {
+        router.push({
+          pathname: "/results",
+          params: { ingredients: JSON.stringify(data.ingredients) },
+        });
       },
-    );
+      onError: (error) => Alert.alert("Analysis Failed", error.message),
+    });
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-primary-950">
-      <StatusBar style="light" />
+    <View className="flex-1 bg-primary-950">
+      <LinearGradient colors={Gradients.background as any} style={StyleSheet.absoluteFill} />
+      <SafeAreaView className="flex-1">
+        <StatusBar style="light" />
 
-      {analyzeImage.isPending ? (
-        <LoadingState message="Analyzing your fridge contents... This may take a moment." />
-      ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-          {/* Header */}
-          <View className="px-6 pt-4 pb-4 flex-row justify-between items-center">
-            <View className="flex-row items-center">
-              <Ionicons name="basket" size={24} color="#6366f1" />
-              <Text className="ml-2 text-2xl font-black text-white italic tracking-tighter">
-                chef<Text className="text-accent-500">ai</Text>.
-              </Text>
-            </View>
-            <View className="flex-row gap-3">
-              <Pressable
-                onPress={() => router.push("/saved")}
-                className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
+        {analyzeImage.isPending ? (
+          <LoadingState message="Analyzing your fridge contents..." />
+        ) : (
+          <>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+              {/* Header */}
+              <Animated.View
+                entering={FadeInUp.delay(200)}
+                className="px-6 pt-4 pb-4 flex-row justify-between items-center"
               >
-                <Ionicons name="heart-outline" size={22} color="white" />
-              </Pressable>
-              <Pressable
-                onPress={handleSignOut}
-                className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
-              >
-                <Ionicons name="log-out-outline" size={22} color="white" />
-              </Pressable>
-            </View>
-          </View>
-
-
-          {/* Promo Banner / Featured */}
-          <View className="px-6 mb-8">
-            <View className="bg-accent-600 rounded-3xl p-6 flex-row items-center overflow-hidden">
-              <View className="flex-1">
-                <Text className="text-white text-3xl font-black mb-1">Smart Scan</Text>
-                <Text className="text-white/80 text-sm font-medium leading-5">
-                  Scan multiple items at once to unlock the most creative and delicious results!
-                </Text>
-              </View>
-              <View className="bg-white/20 p-4 rounded-2xl rotate-12">
-                <Ionicons name="restaurant" size={40} color="white" />
-              </View>
-            </View>
-          </View>
-
-          {/* Categories */}
-          <View className="mb-8">
-            <View className="px-6 flex-row justify-between items-center mb-4">
-              <Text className="text-white text-xl font-bold">Categories</Text>
-              <Pressable>
-                <Text className="text-accent-400 font-bold">View all</Text>
-              </Pressable>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pl-6">
-              {CATEGORIES.map((cat) => (
-                <Pressable
-                  key={cat.id}
-                  onPress={() => setActiveCategory(cat.id)}
-                  className={`mr-4 items-center justify-center p-4 rounded-3xl border ${activeCategory === cat.id
-                    ? "bg-accent-500 border-accent-400"
-                    : "bg-white/5 border-white/10"
-                    }`}
-                  style={{ width: 85, height: 95 }}
-                >
-                  <View className={`w-12 h-12 rounded-2xl items-center justify-center mb-2 ${activeCategory === cat.id ? "bg-white/20" : "bg-white/10"
-                    }`}>
-                    <Ionicons name={cat.icon as any} size={24} color="white" />
+                <View className="flex-row items-center">
+                  <View className="w-12 h-12 rounded-3xl bg-accent-600/20 items-center justify-center border border-accent-600/30">
+                    <Ionicons name="restaurant" size={24} color={Colors.accent[500]} />
                   </View>
-                  <Text className="text-white text-[10px] font-bold uppercase tracking-widest">{cat.name}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* Fridge Scanner Card */}
-          <View className="px-6">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-white text-xl font-bold">Your Fridge</Text>
-            </View>
-
-            {imageUri ? (
-              <View className="bg-white rounded-4xl p-2 shadow-2xl overflow-hidden">
-                <View className="rounded-[28px] overflow-hidden">
-                  <Image
-                    source={{ uri: imageUri }}
-                    style={{ width: '100%', height: 350 }}
-                    contentFit="cover"
-                  />
+                  <Text style={{ fontSize: Typography.size.xl, fontWeight: Typography.weight.black as any }} className="ml-4 text-white tracking-tight">
+                    Chef<Text className="text-accent-500">AI</Text>
+                  </Text>
                 </View>
-                <View className="p-5">
-                  <View className="flex-row items-center mb-4 bg-emerald-50 p-3 rounded-2xl">
-                    <Ionicons name="checkmark-circle" size={24} color="#10b981" />
-                    <Text className="ml-3 text-emerald-800 font-bold">Photo ready for analysis</Text>
-                  </View>
-
+                <View className="flex-row gap-3">
                   <Pressable
-                    onPress={handleAnalyze}
-                    className="bg-emerald-500 rounded-2xl py-5 shadow-lg active:bg-emerald-600 active:scale-[0.98]"
+                    onPress={() => router.push("/saved")}
+                    className="w-11 h-11 rounded-2xl bg-white/5 items-center justify-center border border-white/10 active:bg-white/10"
                   >
-                    <View className="flex-row items-center justify-center">
-                      <Text className="text-center text-xl font-bold text-white mr-2">
-                        Analyze Now
-                      </Text>
-                      <Ionicons name="sparkles" size={20} color="white" />
+                    <Ionicons name="heart" size={20} color="white" />
+                  </Pressable>
+                  <Pressable
+                    onPress={handleSignOut}
+                    className="w-11 h-11 rounded-2xl bg-white/5 items-center justify-center border border-white/10 active:bg-white/10"
+                  >
+                    <Ionicons name="log-out-outline" size={20} color="white" />
+                  </Pressable>
+                </View>
+              </Animated.View>
+
+              {/* Smart Scan Hero */}
+              <Animated.View entering={FadeInDown.delay(400)} className="px-6 mb-8 pt-4">
+                <GlassCard intensity={30} style={{ padding: 0 }}>
+                  <LinearGradient
+                    colors={['rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.05)']}
+                    style={{ padding: Spacing.xl, borderRadius: 24 }}
+                  >
+                    <View className="flex-row items-center mb-4">
+                      <View className="w-12 h-12 rounded-2xl bg-accent-500 items-center justify-center shadow-lg shadow-accent-500/50">
+                        <Ionicons name="sparkles" size={24} color="white" />
+                      </View>
+                      <View className="ml-4">
+                        <Text style={{ fontSize: Typography.size.lg, fontWeight: Typography.weight.black as any }} className="text-white">Smart Scan</Text>
+                        <Text style={{ fontSize: Typography.size.tiny, letterSpacing: Typography.tracking.widest }} className="text-accent-300 font-bold uppercase">AI Powered Assistant</Text>
+                      </View>
                     </View>
-                  </Pressable>
+                    <Text style={{ fontSize: Typography.size.sm, lineHeight: 20 }} className="text-white/70 font-medium mb-4">
+                      Snap a photo of your fridge to get instant, creative recipe ideas based on what you have.
+                    </Text>
+                  </LinearGradient>
+                </GlassCard>
+              </Animated.View>
 
-                  <Pressable
-                    onPress={() => setImageUri(null)}
-                    className="mt-4 py-2"
-                  >
-                    <Text className="text-center text-primary-400 font-bold">Try different photo</Text>
-                  </Pressable>
-                </View>
-              </View>
-            ) : (
-              <View className="bg-white rounded-4xl p-6 shadow-2xl items-center border border-primary-100">
-                <View className="w-20 h-20 bg-primary-50 rounded-3xl items-center justify-center mb-6">
-                  <Ionicons name="camera" size={40} color="#6366f1" />
-                </View>
-                <Text className="text-2xl font-black text-primary-950 mb-2">Build Your Pantry</Text>
-                <Text className="text-primary-500 text-center mb-8 px-4 leading-5">
-                  Snap a photo of all your ingredients together for the best meal suggestions.
-                </Text>
+              {/* Fridge Scanner Section */}
+              <Animated.View entering={FadeInDown.delay(800)} className="px-6">
+                <Text style={{ fontSize: Typography.size.lg, fontWeight: Typography.weight.bold as any }} className="text-white mb-5 tracking-tight">Your Kitchen</Text>
 
-                <View className="flex-row gap-4 w-full">
-                  <Pressable
-                    onPress={() => pickImage(true)}
-                    className="flex-1 bg-primary-950 rounded-2xl py-4 items-center justify-center flex-row shadow-md active:opacity-90"
-                  >
-                    <Ionicons name="camera" size={20} color="white" className="mr-2" />
-                    <Text className="text-white font-bold ml-2">Camera</Text>
-                  </Pressable>
+                {imageUri ? (
+                  <AnimatedCard className="bg-white/5 rounded-[32px] border border-white/10 overflow-hidden">
+                    <View className="p-3">
+                      <View className="rounded-[24px] overflow-hidden bg-black/40">
+                        <Image source={{ uri: imageUri }} style={{ width: '100%', height: 350 }} contentFit="cover" />
+                      </View>
+                    </View>
+                    <View className="p-5">
+                      <View className="flex-row items-center mb-6 bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20">
+                        <Ionicons name="checkmark-circle" size={22} color={Colors.emerald[400]} />
+                        <Text className="ml-3 text-emerald-400 font-bold">Scan ready</Text>
+                      </View>
+                      <GradientButton
+                        title="Analyze Contents"
+                        onPress={handleAnalyze}
+                        icon={<Ionicons name="sparkles" size={20} color="white" />}
+                      />
+                      <Pressable onPress={() => setImageUri(null)} className="mt-4 py-2 items-center">
+                        <Text className="text-white/30 font-bold text-xs uppercase tracking-widest">Try another photo</Text>
+                      </Pressable>
+                    </View>
+                  </AnimatedCard>
+                ) : (
+                  <View className="gap-4">
+                    <Skeleton height={200} borderRadius={32} />
+                    <View className="flex-row gap-4">
+                      <Skeleton height={60} borderRadius={20} style={{ flex: 1 }} />
+                      <Skeleton height={60} borderRadius={20} style={{ flex: 1 }} />
+                    </View>
+                  </View>
+                )}
+              </Animated.View>
+            </ScrollView>
 
-                  <Pressable
-                    onPress={() => pickImage(false)}
-                    className="flex-1 bg-emerald-500 rounded-2xl py-4 items-center justify-center flex-row shadow-md active:bg-emerald-600 active:scale-[0.98]"
-                  >
-                    <Ionicons name="images" size={20} color="white" className="mr-2" />
-                    <Text className="text-white font-bold ml-2">Gallery</Text>
-                  </Pressable>
-                </View>
-              </View>
-            )}
-          </View>
-        </ScrollView>
-      )}
-    </SafeAreaView>
+            <FloatingActionButton
+              onPress={() => pickImage(true)}
+              icon="scan"
+            />
+          </>
+        )}
+      </SafeAreaView>
+    </View>
   );
 }
