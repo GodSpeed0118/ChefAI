@@ -17,6 +17,8 @@ ChefAI is an iOS app that analyzes fridge contents from a photo and recommends r
 - **AI:** OpenAI GPT-4o API for image analysis and recipe generation
 - **Camera:** Expo ImagePicker
 - **Images:** expo-image for optimized image display and caching
+- **Animations:** lottie-react-native for Lottie animations, react-native-reanimated for UI animations
+- **Graphics:** react-native-svg for SVG support
 
 ## Build & Run Commands
 
@@ -57,6 +59,50 @@ The Supabase MCP server is pre-configured in `.mcp.json`.
 - Auth-related code must go through the service layer (`src/services/auth.ts`), not directly calling Supabase in components
 - Use the `useAuth()` hook from `AuthContext` to access auth state and methods app-wide
 - Protected routes are handled automatically by the root layout based on auth state
+- Avoid using Reanimated's `useSharedValue` with `.value` assignments in event handlers; prefer direct style changes or state updates
+- Use Lottie animations for complex loading states instead of custom SVG implementations
+- Color-code UI elements for clarity: green for available/success, red for unavailable/error, yellow/amber for warnings
+
+## UI/UX Design Patterns
+
+### Loading States
+
+ChefAI uses **Lottie animations** for loading indicators to provide a polished, professional experience:
+
+- **LoadingState Component** (`src/components/LoadingState.tsx`) - Uses a golden hourglass Lottie animation with white outline
+- **Animation File** - Located at `assets/animations/hourglass.json`, downloaded from LottieFiles
+- **Color Scheme** - White outline with golden yellow sand/liquid for brand consistency
+- **Usage** - Display during API calls, image analysis, and recipe generation
+
+### Home Screen UX
+
+- **Photo Input** - Placeholder with dashed border and camera icon when no photo is uploaded
+- **Action Buttons** - Two large buttons side-by-side: "Take Photo" (camera) and "Upload Image" (gallery)
+- **Button Styling** - Purple/indigo accent background with increased size (80px height) for better tap targets
+
+### Recipe Display
+
+**Ingredient Color Coding:**
+- **Green (emerald)** - Ingredients the user has (available: true)
+- **Red (rose)** - Ingredients the user needs to buy (available: false)
+- Both show with matching background, border, dot, and text colors
+
+**Macro Display:**
+- Stacked vertically with full labels (Protein, Carbs, Fat)
+- Color-coded dots: emerald (protein), amber (carbs), rose (fat)
+- Font size: 11px for readability
+
+**Recipe Cards:**
+- Collapsed by default with expand/collapse toggle
+- Show difficulty, calories, prep time, and ingredient match count
+- Full ingredient list and step-by-step instructions when expanded
+
+### Results Screen
+
+- **Header** - "AI Suggestions" with dietary filter chips
+- **Identified Items** - Small, grey uppercase label with item count badge
+- **Filter Chips** - Horizontal scrollable list aligned with section labels
+- **Recipe List** - Vertical stack of expandable recipe cards
 
 ## Authentication System
 
@@ -121,33 +167,49 @@ ChefAI/
 │   │   ├── _layout.tsx              # Auth layout (redirects authenticated users)
 │   │   ├── login.tsx                # Login screen
 │   │   └── register.tsx             # Register screen
+│   ├── recipe/                       # Recipe detail route group
+│   │   └── [id].tsx                 # Recipe detail screen (Cook with AI mode)
 │   ├── _layout.tsx                  # Root layout (AuthProvider, auth-based routing)
-│   ├── index.tsx                    # Home screen (camera/gallery + logout button)
+│   ├── index.tsx                    # Home screen (photo input + buttons)
 │   ├── results.tsx                  # Results screen (ingredients + recipes)
 │   └── saved.tsx                    # Saved recipes screen (user-specific)
+├── assets/
+│   └── animations/
+│       └── hourglass.json            # Lottie animation for loading states
 ├── src/
 │   ├── components/                  # Reusable React Native components
-│   │   ├── ErrorState.tsx
-│   │   ├── IngredientTag.tsx
-│   │   ├── LoadingState.tsx
-│   │   └── RecipeCard.tsx
+│   │   ├── common/                  # Common UI components
+│   │   │   ├── AnimatedCard.tsx     # Animated card wrapper (fade-in only)
+│   │   │   ├── FilterChips.tsx      # Horizontal filter chip selector
+│   │   │   ├── GlassCard.tsx        # Glass morphism card with blur
+│   │   │   ├── GradientButton.tsx   # Gradient button with haptics
+│   │   │   └── Skeleton.tsx         # Skeleton loader (unused)
+│   │   ├── ErrorState.tsx           # Error display component
+│   │   ├── IngredientTag.tsx        # Color-coded ingredient tag (green/red)
+│   │   ├── LoadingState.tsx         # Lottie hourglass loading animation
+│   │   └── RecipeCard.tsx           # Expandable recipe card
 │   ├── context/                     # React contexts
 │   │   └── AuthContext.tsx          # Auth state provider
 │   ├── hooks/                       # Custom React hooks
-│   │   ├── useAnalyzeImage.ts
-│   │   ├── useGenerateRecipes.ts
+│   │   ├── useAnalyzeImage.ts       # Image analysis via GPT-4o Vision
+│   │   ├── useGenerateRecipes.ts    # Recipe generation via GPT-4o
 │   │   └── useSavedRecipes.ts       # Supabase-backed saved recipes (per-user)
 │   ├── lib/                         # Library/client initialization
-│   │   ├── openai.ts
-│   │   ├── queryClient.ts
+│   │   ├── openai.ts                # OpenAI client setup
+│   │   ├── queryClient.ts           # TanStack Query client
 │   │   └── supabase.ts              # Supabase client with AsyncStorage
 │   ├── services/                    # Business logic services
 │   │   ├── ai.ts                    # AI functions (analyzeImage, generateRecipes)
 │   │   ├── auth.ts                  # Auth service layer (signUp, signIn, signOut)
-│   │   └── storage.ts
+│   │   └── storage.ts               # Storage utilities
+│   ├── theme/                       # Theme configuration
+│   │   ├── Colors.ts                # Color palette
+│   │   ├── Gradients.ts             # Gradient definitions
+│   │   ├── Spacing.ts               # Spacing scale
+│   │   └── Typography.ts            # Typography scale
 │   └── types/                       # TypeScript types & Zod schemas
-│       ├── api.ts
-│       └── recipe.ts
+│       ├── api.ts                   # API response types
+│       └── recipe.ts                # Recipe types
 ├── supabase/
 │   └── migrations/
 │       └── 001_saved_recipes.sql    # Creates saved_recipes table with RLS
@@ -218,3 +280,68 @@ const { savedRecipes, isLoading, isSaved, toggleSave, refresh } = useSavedRecipe
 - Saves recipes via Supabase INSERT
 - Removes recipes via Supabase DELETE (queries by `recipe_data->>'name'`)
 - No longer uses AsyncStorage (fully migrated to Supabase)
+
+## Animations & Performance
+
+### Lottie Animations
+
+ChefAI uses **lottie-react-native** for professional, performant animations:
+
+```typescript
+import LottieView from "lottie-react-native";
+
+<LottieView
+  source={require("../../assets/animations/hourglass.json")}
+  autoPlay
+  loop
+  style={{ width: 120, height: 120 }}
+/>
+```
+
+**Best Practices:**
+- Store Lottie JSON files in `assets/animations/`
+- Use free animations from [LottieFiles.com](https://lottiefiles.com)
+- Customize colors by editing the JSON file (search and replace RGB values)
+- Keep file sizes under 50KB for optimal performance
+
+**Current Animations:**
+- `hourglass.json` - White outline with golden yellow liquid (customized from LottieFiles)
+
+### React Native Reanimated
+
+**Avoiding Warnings:**
+
+React Native Reanimated v3+ shows warnings when accessing `.value` from the JS thread. To avoid these:
+
+1. **Don't use `useSharedValue` with event handlers** - Prefer regular state updates
+2. **Don't wrap interactive components in Animated.View with entering animations** - Can conflict with user interactions
+3. **Avoid `transition-all` className** - Not supported in React Native
+4. **Use worklets for animations** - Or simplify to state-based styling
+
+**Good Pattern:**
+```typescript
+// Use state for interactive elements
+const [isPressed, setIsPressed] = useState(false);
+
+<Pressable
+  onPressIn={() => setIsPressed(true)}
+  onPressOut={() => setIsPressed(false)}
+  style={isPressed ? styles.pressed : styles.normal}
+>
+```
+
+**Bad Pattern:**
+```typescript
+// Avoid - causes Reanimated warnings
+const scale = useSharedValue(1);
+
+<Pressable
+  onPressIn={() => { scale.value = 0.95; }}
+  onPressOut={() => { scale.value = 1; }}
+>
+```
+
+**When to Use Reanimated:**
+- Entrance animations (`FadeInDown`, `FadeInUp`, etc.)
+- Continuous animations (skeleton loaders, progress indicators)
+- Complex gesture-based interactions (requires React Native Gesture Handler)
