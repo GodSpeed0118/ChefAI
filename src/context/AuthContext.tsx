@@ -21,10 +21,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is already logged in
     const checkUser = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        // If there's a refresh token error, clear the invalid session
+        if (error) {
+          console.log("Session error, clearing invalid session:", error.message);
+          await supabase.auth.signOut();
+          setUser(null);
+        } else {
+          setUser(session?.user ?? null);
+        }
       } catch (error) {
         console.error("Failed to check auth session:", error);
+        // Clear any stale session data
+        await supabase.auth.signOut();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
