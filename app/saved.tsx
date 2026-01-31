@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, Pressable, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { RecipeCard } from "../src/components/RecipeCard";
 import { useSavedRecipes } from "../src/hooks/useSavedRecipes";
 import { LoadingState } from "../src/components/LoadingState";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SavedRecipesScreen() {
     const router = useRouter();

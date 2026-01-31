@@ -54,17 +54,6 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
           </Pressable>
           <View className="flex-row gap-2">
             <Pressable
-              onPress={() => toggleSave(recipe)}
-              className={`w-12 h-12 rounded-full items-center justify-center ${saved ? "bg-red-50" : "bg-primary-50"
-                }`}
-            >
-              <Ionicons
-                name={saved ? "heart" : "heart-outline"}
-                size={24}
-                color={saved ? "#ef4444" : "#94a3b8"}
-              />
-            </Pressable>
-            <Pressable
               onPress={() => setExpanded(!expanded)}
               className="w-12 h-12 rounded-full bg-primary-50 items-center justify-center active:opacity-70"
             >
@@ -116,10 +105,15 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             </View>
 
             <Pressable
-              className="bg-emerald-500 rounded-3xl py-5 items-center justify-center shadow-lg active:bg-emerald-600 active:scale-[0.98]"
-              onPress={() => {/* In a real app, this would start cooking mode */ }}
+              className={`${saved ? "bg-red-500" : "bg-emerald-500"} rounded-3xl py-5 items-center justify-center shadow-lg active:opacity-90 active:scale-[0.98]`}
+              onPress={() => toggleSave(recipe)}
             >
-              <Text className="text-white font-black text-xl tracking-tight">Start Cooking</Text>
+              <View className="flex-row items-center">
+                <Ionicons name={saved ? "heart" : "heart-outline"} size={22} color="white" />
+                <Text className="text-white font-black text-xl tracking-tight ml-3">
+                  {saved ? "Saved to Favorites" : "Save Recipe"}
+                </Text>
+              </View>
             </Pressable>
           </View>
         )}

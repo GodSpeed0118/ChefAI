@@ -15,7 +15,7 @@ const CATEGORIES = [
   { id: 'all', name: 'All', icon: 'grid-outline' },
   { id: 'bakery', name: 'Bakery', icon: 'restaurant-outline' },
   { id: 'fruits', name: 'Fruits', icon: 'nutrition-outline' },
-  { id: 'meat', name: 'Meat', icon: 'paw-outline' }, // closest steak-like
+  { id: 'meat', name: 'Meat', icon: 'fast-food-outline' },
   { id: 'vegetables', name: 'Veggie', icon: 'leaf-outline' },
   { id: 'dairy', name: 'Dairy', icon: 'water-outline' },
 ];
@@ -116,13 +116,6 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {/* Search Bar */}
-          <View className="px-6 mb-8">
-            <View className="flex-row items-center bg-white rounded-full px-5 py-3 shadow-lg">
-              <Ionicons name="search-outline" size={20} color="#64748b" />
-              <Text className="ml-3 text-primary-400 font-medium">Search ingredients or recipes...</Text>
-            </View>
-          </View>
 
           {/* Promo Banner / Featured */}
           <View className="px-6 mb-8">
@@ -130,7 +123,7 @@ export default function HomeScreen() {
               <View className="flex-1">
                 <Text className="text-white text-3xl font-black mb-1">Smart Scan</Text>
                 <Text className="text-white/80 text-sm font-medium leading-5">
-                  Identify any ingredient in seconds and get instant recipes!
+                  Scan multiple items at once to unlock the most creative and delicious results!
                 </Text>
               </View>
               <View className="bg-white/20 p-4 rounded-2xl rotate-12">
@@ -172,9 +165,6 @@ export default function HomeScreen() {
           <View className="px-6">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-white text-xl font-bold">Your Fridge</Text>
-              <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
-                <Text className="text-emerald-400 text-xs font-bold uppercase">Ready to cook</Text>
-              </View>
             </View>
 
             {imageUri ? (
@@ -219,7 +209,7 @@ export default function HomeScreen() {
                 </View>
                 <Text className="text-2xl font-black text-primary-950 mb-2">Build Your Pantry</Text>
                 <Text className="text-primary-500 text-center mb-8 px-4 leading-5">
-                  Capture your ingredients to see what magic you can cook today.
+                  Snap a photo of all your ingredients together for the best meal suggestions.
                 </Text>
 
                 <View className="flex-row gap-4 w-full">
