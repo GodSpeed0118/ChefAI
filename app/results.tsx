@@ -1,12 +1,13 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useGenerateRecipes } from "../src/hooks/useGenerateRecipes";
-import { LoadingState } from "../src/components/LoadingState";
-import { ErrorState } from "../src/components/ErrorState";
-import { RecipeCard } from "../src/components/RecipeCard";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ErrorState } from "../src/components/ErrorState";
+import { LoadingState } from "../src/components/LoadingState";
+import { RecipeCard } from "../src/components/RecipeCard";
+import { useGenerateRecipes } from "../src/hooks/useGenerateRecipes";
+
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -14,12 +15,14 @@ export default function ResultsScreen() {
     ingredients: string;
   }>();
 
+
   let ingredients: string[] = [];
   try {
     ingredients = JSON.parse(ingredientsParam ?? "[]");
   } catch {
     ingredients = [];
   }
+
 
   const {
     data,
@@ -29,9 +32,11 @@ export default function ResultsScreen() {
     refetch,
   } = useGenerateRecipes(ingredients);
 
+
   return (
     <SafeAreaView className="flex-1 bg-primary-950">
       <StatusBar style="light" />
+
 
       {isLoading ? (
         <LoadingState message="Creating recipe magic... This will only take a moment." />
@@ -53,13 +58,10 @@ export default function ResultsScreen() {
               <Ionicons name="arrow-back" size={24} color="white" />
             </Pressable>
             <Text className="text-xl font-black text-white italic">Suggested Cookbooks</Text>
-            <Pressable
-              onPress={() => router.push("/saved")}
-              className="w-10 h-10 rounded-full bg-white/10 items-center justify-center active:bg-white/20"
-            >
-              <Ionicons name="heart-outline" size={22} color="white" />
-            </Pressable>
+            {/* Spacer */}
+            <View className="w-10" />
           </View>
+
 
           <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
             {/* Identified Ingredients Section */}
@@ -72,6 +74,7 @@ export default function ResultsScreen() {
                   <Text className="text-emerald-400 text-xs font-black">{ingredients.length} Items</Text>
                 </View>
               </View>
+
 
               <ScrollView
                 horizontal
@@ -86,12 +89,14 @@ export default function ResultsScreen() {
               </ScrollView>
             </View>
 
+
             {/* Recipes Section */}
             <View className="px-6 pt-6 pb-20">
               <View className="flex-row items-center mb-6">
                 <View className="w-2 h-6 bg-accent-500 rounded-full mr-3 shadow-sm" />
                 <Text className="text-white text-2xl font-black">Ready for you</Text>
               </View>
+
 
               <View className="gap-6">
                 {data?.recipes.map((recipe, index) => (
