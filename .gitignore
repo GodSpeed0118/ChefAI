@@ -46,3 +46,4 @@ app-example
 .mcp.json
 .env
 .env.local
+CLAUDE.md
